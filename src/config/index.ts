@@ -11,5 +11,5 @@ export default {
     accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN!,
     refreshSecret: process.env.JWT_REFRESH_SECRET!,
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN!,
-
+    app_url: process.env.APP_URL,
 };

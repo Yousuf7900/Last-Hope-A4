@@ -22,13 +22,40 @@ const createRental = catchAsync(async (req: Request, res: Response) => {
 
 });
 
-const getMyRentals = catchAsync() => {
+const getMyRentals = catchAsync(async (req: Request, res: Response) => {
 
-}
+    const tenantId = req.user!.userId;
 
-const getRentalById = catchAsync() => {
+    const result = await RentalServices.getMyRentals(tenantId);
 
-}
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Rental requests retrieved successfully",
+        data: result
+    });
+
+});
+
+const getRentalById = catchAsync(async (req: Request, res: Response) => {
+
+    const tenantId = req.user!.userId;
+
+    const rentalId = req.params.id;
+
+    const result = await RentalServices.getRentalById(
+        tenantId,
+        rentalId
+    );
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Rental request retrieved successfully",
+        data: result
+    });
+
+});
 
 export const RentalControllers = {
     createRental,

@@ -72,12 +72,63 @@ const createRental = async (tenantId: string, payload: TCreateRental) => {
 };
 
 
-const getMyRentals = async () => {
+const getMyRentals = async (tenantId: string) => {
+    const rentals = await prisma.rental.findMany({
+        where: {
+            tenantId
+        },
+        include: {
+            property: {
+                include: {
+                    category: true,
+                    landlord: {
+                        omit: {
+                            password: true
+                        }
+                    }
+                }
+            }
+        },
+        orderBy: {
+            createdAt: "desc"
+        }
+    });
 
+    return rentals;
 }
 
-const getRentalById = async () => {
+const getRentalById = async (tenantId: string, rentalId: string) => {
+    const rental = await prisma.rental.findUnique({
+        where: {
+            id: rentalId
+        },
+        include: {
+            property: {
+                include: {
+                    category: true,
+                    landlord: {
+                        omit: {
+                            password: true
+                        }
+                    }
+                }
+            },
+            tenant: {
+                omit: {
+                    password: true
+                }
+            }
+        }
+    });
 
+    if (!rental) {
+        throw new Error("Rental request not found");
+    }
+    if (rental.tenantId !== tenantId) {
+        throw new Error("You are not authorized to access this rental request");
+    }
+
+    return rental;
 }
 
 export const RentalServices = {
