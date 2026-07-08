@@ -5,6 +5,8 @@ import cors from "cors";
 import httpStatus from "http-status";
 import { AuthRoutes } from "./modules/auth/auth.route";
 import { CategoryRoutes } from "./modules/category/category.route";
+import { PropertyRoutes } from "./modules/property/property.route";
+import { LandlordRoutes } from "./modules/landlord/landlord.route";
 
 const app: Application = express();
 
@@ -22,7 +24,10 @@ app.get("/", (req: Request, res: Response) => {
     });
 });
 
+
 app.use("/api/v1/auth", AuthRoutes);
 app.use("/api/categories", CategoryRoutes);
+app.use("/api/properties", PropertyRoutes);
+app.use("/api/v1/landlord", LandlordRoutes);
 
 export default app;
