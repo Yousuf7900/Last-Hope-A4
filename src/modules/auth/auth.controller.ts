@@ -4,30 +4,33 @@ import httpStatus from "http-status";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 
-const register = catchAsync(async (req: Request, res: Response) => {
-    const result = await AuthServices.registerUser(req.body);
 
-    sendResponse(res, {
-        success: true,
-        statusCode: httpStatus.CREATED,
-        message: "User registered successfully",
-        data: result
+
+const login = catchAsync(async (req: Request, res: Response) => {
+    const { accessToken, refreshToken, user } = await AuthServices.loginUser(req.body);
+
+    res.cookie("accessToken", accessToken, {
+        httpOnly: true,
+        sameSite: "none",
+        secure: false,
+        maxAge: 1000 * 60 * 60 * 24
     })
-})
 
-const login = async (req: Request, res: Response) => {
-    console.log(req.body);
-    const result = await AuthServices.loginUser(req.body);
+    res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        sameSite: "none",
+        secure: false,
+        maxAge: 1000 * 60 * 60 * 24 * 7
+    })
 
     sendResponse(res, {
         success: true,
         statusCode: httpStatus.OK,
         message: "User logged in successfully",
-        data: result
+        data: { accessToken, refreshToken, user }
     })
-}
+});
 
 export const AuthControllers = {
-    register,
     login
 }
