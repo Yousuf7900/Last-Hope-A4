@@ -51,8 +51,8 @@ const createRental = async (tenantId: string, payload: TCreateRental) => {
         data: {
             propertyId,
             tenantId,
-            moveInDate,
-            status: RentalStatus.PENDING
+            status: RentalStatus.PENDING,
+            ...(moveInDate ? { moveInDate } : {})
         },
         include: {
             property: {

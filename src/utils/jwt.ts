@@ -1,16 +1,21 @@
-import jwt, { type JwtPayload, type Secret, type SignOptions } from "jsonwebtoken";
+import jwt, { type Secret } from "jsonwebtoken";
+import type { StringValue } from "ms";
 
-const createToken = (payload: JwtPayload, secret: Secret, expiresIn: SignOptions["expiresIn"]) => {
-    const token = jwt.sign(payload, secret, { expiresIn } as SignOptions);
-
-    return token;
-}
+const createToken = (
+    payload: object,
+    secret: Secret,
+    expiresIn: string
+) => {
+    return jwt.sign(payload, secret, {
+        expiresIn: expiresIn as StringValue
+    });
+};
 
 const verifyToken = (token: string, secret: Secret) => {
     return jwt.verify(token, secret);
-}
+};
 
 export const JwtUtils = {
     createToken,
-    verifyToken,
-}
+    verifyToken
+};

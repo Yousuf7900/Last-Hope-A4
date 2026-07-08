@@ -41,7 +41,7 @@ const getRentalById = catchAsync(async (req: Request, res: Response) => {
 
     const tenantId = req.user!.userId;
 
-    const rentalId = req.params.id;
+    const rentalId = req.params.id as string;
 
     const result = await RentalServices.getRentalById(
         tenantId,

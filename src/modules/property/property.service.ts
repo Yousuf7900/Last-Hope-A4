@@ -2,9 +2,10 @@ import { prisma } from "../../lib/prisma";
 import type { TPropertyQuery } from "../../types/property.type";
 
 const getAllPropertiesFromDB = async (query: TPropertyQuery) => {
+
     const { location, type, minPrice, maxPrice } = query;
 
-    const where: TPropertyQuery = {};
+    const where: any = {};
 
     if (location) {
         where.location = {
@@ -23,6 +24,7 @@ const getAllPropertiesFromDB = async (query: TPropertyQuery) => {
     }
 
     if (minPrice || maxPrice) {
+
         where.rentAmount = {};
 
         if (minPrice) {
@@ -55,6 +57,7 @@ const getAllPropertiesFromDB = async (query: TPropertyQuery) => {
 };
 
 const getSinglePropertyFromDB = async (propertyId: string) => {
+
     const property = await prisma.property.findUnique({
         where: {
             id: propertyId
