@@ -4,6 +4,7 @@ import express from "express";
 import cors from "cors";
 import httpStatus from "http-status";
 import { AuthRoutes } from "./modules/auth/auth.route";
+import { CategoryRoutes } from "./modules/category/category.route";
 
 const app: Application = express();
 
@@ -22,5 +23,6 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/api/v1/auth", AuthRoutes);
+app.use("/api/categories", CategoryRoutes);
 
 export default app;
