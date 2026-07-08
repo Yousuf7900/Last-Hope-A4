@@ -1,13 +1,16 @@
 {
   "name": "l2a4",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "RentNest Backend",
+  "main": "server.ts",
   "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Yousuf Islam",
   "license": "ISC",
   "type": "module",
   "dependencies": {
@@ -22,6 +25,7 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "http-status": "^2.1.0",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.22.0",
     "zod": "^4.4.3"
