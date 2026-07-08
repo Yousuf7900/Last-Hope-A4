@@ -1,8 +1,40 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "../../lib/prisma";
 import config from "../../config";
-import type { TLoginUser } from "../../types/auth.type";
+import type { TLoginUser, TRegisterUser } from "../../types/auth.type";
 import { JwtUtils } from "../../utils/jwt";
+
+const registerUser = async (payload: TRegisterUser) => {
+    const { name, email, password, role } = payload;
+
+    const isUserExist = await prisma.user.findUnique({
+        where: { email }
+    });
+
+    if (isUserExist) {
+        throw new Error("User already exists");
+    };
+
+    const hashedPassword = await bcrypt.hash(password, Number(config.salt_round));
+
+    const user = await prisma.user.create({
+        data: {
+            name,
+            email,
+            password: hashedPassword,
+            role
+        },
+        omit: {
+            password: true
+        }
+    });
+
+    return {
+        user
+    };
+
+};
+
 
 const loginUser = async (payload: TLoginUser) => {
     const { email, password } = payload;
@@ -35,7 +67,7 @@ const loginUser = async (payload: TLoginUser) => {
 
     const refreshToken = JwtUtils.createToken(jwtPayload, config.refreshSecret, config.refreshExpiresIn);
 
-    const {password: _, ...userWithoutPassword} = user;
+    const { password: _, ...userWithoutPassword } = user;
 
     return {
         accessToken,
@@ -44,6 +76,25 @@ const loginUser = async (payload: TLoginUser) => {
     }
 }
 
+const getMe = async (userId: string) => {
+    const user = await prisma.user.findUnique({
+        where: {
+            id: userId
+        },
+        omit: {
+            password: true
+        }
+    });
+
+    if (!user) {
+        throw new Error("User not found");
+    }
+
+    return user;
+}
+
 export const AuthServices = {
-    loginUser
+    registerUser,
+    loginUser,
+    getMe
 }
