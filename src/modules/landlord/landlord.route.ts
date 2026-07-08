@@ -8,5 +8,7 @@ const router = Router();
 
 
 router.post("/properties", auth(UserRole.LANDLORD), LandlordControllers.createProperty);
+router.put("/properties/:id", auth(UserRole.LANDLORD), LandlordControllers.updateProperty);
+router.delete("/properties/:id", auth(UserRole.LANDLORD), LandlordControllers.deleteProperty);
 
 export const LandlordRoutes = router;
