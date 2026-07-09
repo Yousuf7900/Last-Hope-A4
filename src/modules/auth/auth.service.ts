@@ -5,10 +5,18 @@ import type { TLoginUser, TRegisterUser } from "../../types/auth.type";
 import { JwtUtils } from "../../utils/jwt";
 import GlobalError from "../../error/globalError";
 import httpStatus from "http-status";
+import { UserRole } from "../../../generated/prisma/enums";
 
 const registerUser = async (payload: TRegisterUser) => {
     const { name, email, password, role } = payload;
 
+    if (role === UserRole.ADMIN) {
+        throw new GlobalError(
+            httpStatus.FORBIDDEN,
+            "Admin registration is not allowed"
+        );
+    }
+    
     const isUserExist = await prisma.user.findUnique({
         where: { email }
     });
