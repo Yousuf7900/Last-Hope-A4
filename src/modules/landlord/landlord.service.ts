@@ -1,5 +1,6 @@
+import { RentalStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
-import type { TCreateProperty, TUpdateProperty } from "./landlord.interface";
+import type { TCreateProperty, TUpdateProperty, TUpdateRentalStatus } from "./landlord.interface";
 
 
 const createProperty = async (landlordId: string, payload: TCreateProperty) => {
@@ -141,6 +142,77 @@ const getRentalRequests = async (landlordId: string) => {
 };
 
 
+const updateRentalRequest = async (
+    landlordId: string,
+    rentalId: string,
+    payload: TUpdateRentalStatus
+) => {
+
+    const rental = await prisma.rental.findUnique({
+        where: {
+            id: rentalId
+        },
+        include: {
+            property: true
+        }
+    });
+
+    if (!rental) {
+        throw new Error("Rental request not found");
+    }
+
+    if (rental.property.landlordId !== landlordId) {
+        throw new Error("You are not authorized");
+    }
+
+    if (rental.status !== RentalStatus.PENDING) {
+        throw new Error("Rental request has already been processed");
+    }
+
+    if (
+        payload.status !== RentalStatus.APPROVED &&
+        payload.status !== RentalStatus.REJECTED
+    ) {
+        throw new Error("Status must be APPROVED or REJECTED");
+    }
+
+    const updatedRental = await prisma.rental.update({
+        where: {
+            id: rentalId
+        },
+        data: {
+            status: payload.status
+        },
+        include: {
+            tenant: {
+                omit: {
+                    password: true
+                }
+            },
+            property: {
+                include: {
+                    category: true
+                }
+            }
+        }
+    });
+
+    if (payload.status === RentalStatus.APPROVED) {
+
+        await prisma.property.update({
+            where: {
+                id: rental.propertyId
+            },
+            data: {
+                isAvailable: false
+            }
+        });
+
+    }
+
+    return updatedRental;
+};
+
 
 
 export const LandlordServices = {
@@ -148,4 +220,5 @@ export const LandlordServices = {
     updateProperty,
     deleteProperty,
     getRentalRequests,
+    updateRentalRequest,
 }

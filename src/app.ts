@@ -9,6 +9,7 @@ import { PropertyRoutes } from "./modules/property/property.route";
 import { LandlordRoutes } from "./modules/landlord/landlord.route";
 import { RentalRoutes } from "./modules/rental/rental.route";
 import config from "./config";
+import { AdminRoutes } from "./modules/admin/admin.route";
 
 const app: Application = express();
 
@@ -35,5 +36,6 @@ app.use("/api/categories", CategoryRoutes);
 app.use("/api/properties", PropertyRoutes);
 app.use("/api/v1/landlord", LandlordRoutes);
 app.use("/api/v1/rentals", RentalRoutes);
+app.use("/api/v1/admin", AdminRoutes);
 
 export default app;
