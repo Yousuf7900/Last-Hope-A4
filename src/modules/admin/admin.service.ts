@@ -1,6 +1,7 @@
+import GlobalError from "../../error/globalError";
 import { prisma } from "../../lib/prisma";
 import type { TUpdateUserStatus } from "./admin.interface";
-
+import httpStatus from "http-status"
 
 const getUsers = async () => {
 
@@ -23,7 +24,7 @@ const updateUserStatus = async (
 ) => {
 
     if (adminId === userId) {
-        throw new Error("You cannot update your own account.");
+        throw new GlobalError(httpStatus.BAD_REQUEST,"You cannot update your own account.");
     }
 
     const user = await prisma.user.findUnique({
@@ -33,7 +34,7 @@ const updateUserStatus = async (
     });
 
     if (!user) {
-        throw new Error("User not found");
+        throw new GlobalError(httpStatus.NOT_FOUND,"User not found");
     }
 
     const updatedUser = await prisma.user.update({

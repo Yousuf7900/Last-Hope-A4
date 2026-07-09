@@ -1,3 +1,4 @@
+import { globalErrorHandler } from "./middlewares/globalErrorHandler";
 import cookieParser from "cookie-parser";
 import type { Application, Request, Response } from "express";
 import express from "express";
@@ -12,6 +13,7 @@ import config from "./config";
 import { AdminRoutes } from "./modules/admin/admin.route";
 import { PaymentRoutes } from "./modules/payment/payment.route";
 import { PaymentControllers } from "./modules/payment/payment.controller";
+import { ReviewRoutes } from "./modules/review/review.route";
 
 const app: Application = express();
 
@@ -41,6 +43,9 @@ app.use("/api/v1/landlord", LandlordRoutes);
 app.use("/api/v1/rentals", RentalRoutes);
 app.use("/api/v1/admin", AdminRoutes);
 app.use("/api/v1/payments", PaymentRoutes);
+app.use("/api/v1/reviews", ReviewRoutes);
+
+app.use(globalErrorHandler);
 
 
 export default app;

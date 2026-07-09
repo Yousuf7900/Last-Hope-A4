@@ -1,7 +1,8 @@
 import { RentalStatus } from "../../../generated/prisma/enums";
+import GlobalError from "../../error/globalError";
 import { prisma } from "../../lib/prisma";
 import type { TCreateProperty, TUpdateProperty, TUpdateRentalStatus } from "./landlord.interface";
-
+import httpStatus from "http-status"
 
 const createProperty = async (landlordId: string, payload: TCreateProperty) => {
     const category = await prisma.category.findUnique({
@@ -11,7 +12,7 @@ const createProperty = async (landlordId: string, payload: TCreateProperty) => {
     });
 
     if (!category) {
-        throw new Error("Category not found");
+        throw new GlobalError(httpStatus.NOT_FOUND, "Category not found");
     }
 
     const property = await prisma.property.create({
@@ -49,11 +50,11 @@ const updateProperty = async (landlordId: string, propertyId: string, payload: T
     });
 
     if (!property) {
-        throw new Error("Property not found");
+        throw new GlobalError(httpStatus.NOT_FOUND, "Property not found");
     }
 
     if (property.landlordId !== landlordId) {
-        throw new Error("You are not authorized to update this property");
+        throw new GlobalError(httpStatus.FORBIDDEN, "You are not authorized to update this property");
     }
 
     if (payload.categoryId) {
@@ -64,7 +65,7 @@ const updateProperty = async (landlordId: string, propertyId: string, payload: T
         });
 
         if (!category) {
-            throw new Error("Category not found");
+            throw new GlobalError(httpStatus.NOT_FOUND, "Category not found");
         }
     }
 
@@ -96,11 +97,11 @@ const deleteProperty = async (landlordId: string, propertyId: string) => {
     });
 
     if (!property) {
-        throw new Error("Property not found");
+        throw new GlobalError(httpStatus.NOT_FOUND, "Property not found");
     }
 
     if (property.landlordId !== landlordId) {
-        throw new Error("You are not authorized to delete this property");
+        throw new GlobalError(httpStatus.FORBIDDEN, "You are not authorized to delete this property");
     }
 
     await prisma.property.delete({
@@ -158,22 +159,22 @@ const updateRentalRequest = async (
     });
 
     if (!rental) {
-        throw new Error("Rental request not found");
+        throw new GlobalError(httpStatus.NOT_FOUND, "Rental request not found");
     }
 
     if (rental.property.landlordId !== landlordId) {
-        throw new Error("You are not authorized");
+        throw new GlobalError(httpStatus.FORBIDDEN, "You are not authorized");
     }
 
     if (rental.status !== RentalStatus.PENDING) {
-        throw new Error("Rental request has already been processed");
+        throw new GlobalError(httpStatus.BAD_REQUEST, "Rental request has already been processed");
     }
 
     if (
         payload.status !== RentalStatus.APPROVED &&
         payload.status !== RentalStatus.REJECTED
     ) {
-        throw new Error("Status must be APPROVED or REJECTED");
+        throw new GlobalError(httpStatus.BAD_REQUEST, "Status must be APPROVED or REJECTED");
     }
 
     const updatedRental = await prisma.rental.update({

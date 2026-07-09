@@ -1,7 +1,8 @@
 import { RentalStatus } from "../../../generated/prisma/enums";
+import GlobalError from "../../error/globalError";
 import { prisma } from "../../lib/prisma";
 import type { TCreateRental } from "./rental.interface";
-
+import httpStatus from "http-status"
 const createRental = async (tenantId: string, payload: TCreateRental) => {
 
     const { propertyId, moveInDate } = payload;
@@ -13,15 +14,15 @@ const createRental = async (tenantId: string, payload: TCreateRental) => {
     });
 
     if (!property) {
-        throw new Error("Property not found");
+        throw new GlobalError(httpStatus.NOT_FOUND, "Property not found");
     }
 
     if (!property.isAvailable) {
-        throw new Error("Property is not available");
+        throw new GlobalError(httpStatus.NOT_FOUND, "Property is not available");
     }
 
     if (property.landlordId === tenantId) {
-        throw new Error("You cannot rent your own property");
+        throw new GlobalError(httpStatus.BAD_REQUEST, "You cannot rent your own property");
     }
 
     const approvedRental = await prisma.rental.findFirst({
@@ -32,7 +33,7 @@ const createRental = async (tenantId: string, payload: TCreateRental) => {
     });
 
     if (approvedRental) {
-        throw new Error("This property has already been rented.");
+        throw new GlobalError(httpStatus.CONFLICT, "This property has already been rented.");
     }
 
     const existingRequest = await prisma.rental.findFirst({
@@ -44,7 +45,7 @@ const createRental = async (tenantId: string, payload: TCreateRental) => {
     });
 
     if (existingRequest) {
-        throw new Error("You already have a pending request for this property");
+        throw new GlobalError(httpStatus.CONFLICT, "You already have a pending request for this property");
     }
 
     const rental = await prisma.rental.create({
@@ -122,10 +123,10 @@ const getRentalById = async (tenantId: string, rentalId: string) => {
     });
 
     if (!rental) {
-        throw new Error("Rental request not found");
+        throw new GlobalError(httpStatus.NOT_FOUND, "Rental request not found");
     }
     if (rental.tenantId !== tenantId) {
-        throw new Error("You are not authorized to access this rental request");
+        throw new GlobalError(httpStatus.FORBIDDEN, "You are not authorized to access this rental request");
     }
 
     return rental;

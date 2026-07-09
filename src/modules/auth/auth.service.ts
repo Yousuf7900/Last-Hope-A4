@@ -3,6 +3,8 @@ import { prisma } from "../../lib/prisma";
 import config from "../../config";
 import type { TLoginUser, TRegisterUser } from "../../types/auth.type";
 import { JwtUtils } from "../../utils/jwt";
+import GlobalError from "../../error/globalError";
+import httpStatus from "http-status";
 
 const registerUser = async (payload: TRegisterUser) => {
     const { name, email, password, role } = payload;
@@ -12,7 +14,7 @@ const registerUser = async (payload: TRegisterUser) => {
     });
 
     if (isUserExist) {
-        throw new Error("User already exists");
+        throw new GlobalError(httpStatus.CONFLICT, "User already exists");
     };
 
     const hashedPassword = await bcrypt.hash(password, Number(config.salt_round));
@@ -44,17 +46,17 @@ const loginUser = async (payload: TLoginUser) => {
     })
 
     if (!user) {
-        throw new Error("User does not exist");
+        throw new GlobalError(httpStatus.NOT_FOUND, "User does not exist");
     };
 
     if (user.isBlocked) {
-        throw new Error("This user is blocked");
+        throw new GlobalError(httpStatus.FORBIDDEN, "This user is blocked");
     };
 
     const isPasswordMatched = await bcrypt.compare(password, user.password);
 
     if (!isPasswordMatched) {
-        throw new Error("Invalid credentials");
+        throw new GlobalError(httpStatus.UNAUTHORIZED, "Invalid credentials");
     };
 
     const jwtPayload = {
@@ -87,7 +89,7 @@ const getMe = async (userId: string) => {
     });
 
     if (!user) {
-        throw new Error("User not found");
+        throw new GlobalError(httpStatus.NOT_FOUND, "User not found");
     }
 
     return user;

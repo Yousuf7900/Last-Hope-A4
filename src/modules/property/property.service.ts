@@ -1,6 +1,7 @@
+import GlobalError from "../../error/globalError";
 import { prisma } from "../../lib/prisma";
 import type { TPropertyQuery } from "../../types/property.type";
-
+import httpStatus from "http-status";
 const getAllPropertiesFromDB = async (query: TPropertyQuery) => {
 
     const { location, type, minPrice, maxPrice } = query;
@@ -75,7 +76,7 @@ const getSinglePropertyFromDB = async (propertyId: string) => {
     });
 
     if (!property) {
-        throw new Error("Property not found");
+        throw new GlobalError(httpStatus.NOT_FOUND, "Property not found");
     }
 
     return property;

@@ -4,6 +4,8 @@ import config from "../../config";
 import { prisma } from "../../lib/prisma";
 import { stripe } from "../../lib/stripe";
 import type { TCreatePayment } from "./payment.interface";
+import httpStatus from "http-status";
+import GlobalError from "../../error/globalError";
 
 const createPayment = async (tenantId: string, payload: TCreatePayment) => {
     const { rentalId } = payload;
@@ -19,19 +21,19 @@ const createPayment = async (tenantId: string, payload: TCreatePayment) => {
     });
 
     if (!rental) {
-        throw new Error("Rental request not found");
+        throw new GlobalError(httpStatus.NOT_FOUND,"Rental request not found");
     }
 
     if (rental.tenantId !== tenantId) {
-        throw new Error("You are not authorized to pay for this rental");
+        throw new GlobalError(httpStatus.FORBIDDEN,"You are not authorized to pay for this rental");
     }
 
     if (rental.status !== RentalStatus.APPROVED) {
-        throw new Error("Rental request is not approved yet");
+        throw new GlobalError(httpStatus.BAD_REQUEST,"Rental request is not approved yet");
     }
 
     if (rental.payment) {
-        throw new Error("Payment already exists for this rental");
+        throw new GlobalError(httpStatus.CONFLICT,"Payment already exists for this rental");
     }
 
     const payment = await prisma.payment.create({
@@ -87,7 +89,7 @@ const confirmPayment = async (event: Stripe.Event) => {
     const paymentId = session.metadata?.paymentId;
 
     if (!paymentId) {
-        throw new Error("Payment metadata not found");
+        throw new GlobalError(httpStatus.BAD_REQUEST,"Payment metadata not found");
     }
 
     const paymentIntentId = session.payment_intent?.toString() ?? null;
@@ -128,7 +130,67 @@ const confirmPayment = async (event: Stripe.Event) => {
 
 };
 
+const getMyPayments = async (tenantId: string) => {
+
+    const payments = await prisma.payment.findMany({
+        where: {
+            tenantId
+        },
+        include: {
+            rental: {
+                include: {
+                    property: {
+                        include: {
+                            category: true
+                        }
+                    }
+                }
+            }
+        },
+        orderBy: {
+            createdAt: "desc"
+        }
+    });
+
+    return payments;
+};
+
+const getPaymentById = async (
+    tenantId: string,
+    paymentId: string
+) => {
+
+    const payment = await prisma.payment.findUnique({
+        where: {
+            id: paymentId
+        },
+        include: {
+            rental: {
+                include: {
+                    property: {
+                        include: {
+                            category: true
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    if (!payment) {
+        throw new GlobalError(httpStatus.NOT_FOUND,"Payment not found");
+    }
+
+    if (payment.tenantId !== tenantId) {
+        throw new GlobalError(httpStatus.FORBIDDEN,"You are not authorized to access this payment");
+    }
+
+    return payment;
+};
+
 export const PaymentServices = {
     createPayment,
     confirmPayment,
+    getMyPayments,
+    getPaymentById
 }
