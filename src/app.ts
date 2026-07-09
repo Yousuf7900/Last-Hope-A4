@@ -10,12 +10,15 @@ import { LandlordRoutes } from "./modules/landlord/landlord.route";
 import { RentalRoutes } from "./modules/rental/rental.route";
 import config from "./config";
 import { AdminRoutes } from "./modules/admin/admin.route";
+import { PaymentRoutes } from "./modules/payment/payment.route";
+import { PaymentControllers } from "./modules/payment/payment.controller";
 
 const app: Application = express();
 
+app.post("/api/v1/payments/confirm", express.raw({ type: "application/json" }), PaymentControllers.confirmPayment)
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
     origin: config.app_url,
@@ -37,5 +40,7 @@ app.use("/api/properties", PropertyRoutes);
 app.use("/api/v1/landlord", LandlordRoutes);
 app.use("/api/v1/rentals", RentalRoutes);
 app.use("/api/v1/admin", AdminRoutes);
+app.use("/api/v1/payments", PaymentRoutes);
+
 
 export default app;

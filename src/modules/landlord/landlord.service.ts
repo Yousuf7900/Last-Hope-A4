@@ -18,7 +18,7 @@ const createProperty = async (landlordId: string, payload: TCreateProperty) => {
         data: {
             title: payload.title,
             description: payload.description,
-            location: payload.description,
+            location: payload.location,
             address: payload.address,
             rentAmount: payload.rentAmount,
             bedrooms: payload.bedrooms,
@@ -197,18 +197,18 @@ const updateRentalRequest = async (
         }
     });
 
-    if (payload.status === RentalStatus.APPROVED) {
+    // if (payload.status === RentalStatus.APPROVED) {
 
-        await prisma.property.update({
-            where: {
-                id: rental.propertyId
-            },
-            data: {
-                isAvailable: false
-            }
-        });
+    //     await prisma.property.update({
+    //         where: {
+    //             id: rental.propertyId
+    //         },
+    //         data: {
+    //             isAvailable: false
+    //         }
+    //     });
 
-    }
+    // }
 
     return updatedRental;
 };

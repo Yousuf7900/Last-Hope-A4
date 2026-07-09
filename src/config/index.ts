@@ -12,4 +12,7 @@ export default {
     refreshSecret: process.env.JWT_REFRESH_SECRET!,
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN!,
     app_url: process.env.APP_URL,
+    stripe_publishable_key: process.env.STRIPE_PUBLISHABLE_KEY!,
+    stripe_secret_key: process.env.STRIPE_SECRET_KEY!,
+    stripe_webhook_secret_key: process.env.STRIPE_WEBHOOK_SECRET!
 };
