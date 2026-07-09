@@ -1,3 +1,5 @@
+import type { RentalStatus } from "../../../generated/prisma/enums";
+
 export type TCreateProperty = {
     title: string;
     description: string;
@@ -20,3 +22,7 @@ export type TUpdateProperty = {
     isAvailable?: boolean;
     categoryId?: string;
 };
+
+export type TUpdateRentalStatus = {
+    status: RentalStatus;
+}
