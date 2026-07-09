@@ -7,5 +7,11 @@ const router = Router();
 
 router.get("/users", auth(UserRole.ADMIN), AdminControllers.getUsers);
 
+router.patch("/users/:id", auth(UserRole.ADMIN), AdminControllers.updateUserStatus);
+
+router.get("/properties", auth(UserRole.ADMIN), AdminControllers.getProperties);
+
+router.get("/rentals", auth(UserRole.ADMIN), AdminControllers.getRentals);
+
 
 export const AdminRoutes = router;

@@ -1,8 +1,8 @@
 model Category {
-    id String @id @default(uuid())
-    name String @unique
-    properties Property[]
+  id         String     @id @default(uuid())
+  name       String     @unique
+  properties Property[]
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
