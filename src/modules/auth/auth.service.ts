@@ -118,6 +118,13 @@ const updateMe = async (
         throw new GlobalError(httpStatus.NOT_FOUND, "User not found");
     }
 
+    if (!payload.name && !payload.password) {
+        throw new GlobalError(
+            httpStatus.BAD_REQUEST,
+            "Nothing to update"
+        );
+    }
+
     const dataToUpdate: Record<string, unknown> = {};
 
     if (payload.name) {
