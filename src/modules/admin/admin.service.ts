@@ -1,6 +1,6 @@
 import GlobalError from "../../error/globalError";
 import { prisma } from "../../lib/prisma";
-import type { TUpdateUserStatus } from "./admin.interface";
+import type { TCategory, TUpdateUserStatus } from "./admin.interface";
 import httpStatus from "http-status"
 
 const getUsers = async () => {
@@ -24,7 +24,7 @@ const updateUserStatus = async (
 ) => {
 
     if (adminId === userId) {
-        throw new GlobalError(httpStatus.BAD_REQUEST,"You cannot update your own account.");
+        throw new GlobalError(httpStatus.BAD_REQUEST, "You cannot update your own account.");
     }
 
     const user = await prisma.user.findUnique({
@@ -34,7 +34,7 @@ const updateUserStatus = async (
     });
 
     if (!user) {
-        throw new GlobalError(httpStatus.NOT_FOUND,"User not found");
+        throw new GlobalError(httpStatus.NOT_FOUND, "User not found");
     }
 
     const updatedUser = await prisma.user.update({
@@ -99,10 +99,112 @@ const getRentals = async () => {
     return rentals;
 };
 
+const createCategory = async (payload: TCategory) => {
+
+    const categoryExists = await prisma.category.findUnique({
+        where: {
+            name: payload.name
+        }
+    });
+
+    if (categoryExists) {
+        throw new GlobalError(
+            httpStatus.CONFLICT, "Category already exists"
+        );
+    }
+
+    const category = await prisma.category.create({
+        data: {
+            name: payload.name
+        }
+    });
+
+    return category;
+};
+
+const updateCategory = async (
+    categoryId: string,
+    payload: TCategory
+) => {
+
+    const category = await prisma.category.findUnique({
+        where: {
+            id: categoryId
+        }
+    });
+
+    if (!category) {
+        throw new GlobalError(
+            httpStatus.NOT_FOUND, "Category not found"
+        );
+    }
+
+    const duplicate = await prisma.category.findFirst({
+        where: {
+            name: payload.name,
+            NOT: {
+                id: categoryId
+            }
+        }
+    });
+
+    if (duplicate) {
+        throw new GlobalError(
+            httpStatus.CONFLICT, "Category already exists"
+        );
+    }
+
+    const updatedCategory = await prisma.category.update({
+        where: {
+            id: categoryId
+        },
+        data: {
+            name: payload.name
+        }
+    });
+
+    return updatedCategory;
+};
+
+const deleteCategory = async (categoryId: string) => {
+
+    const category = await prisma.category.findUnique({
+        where: {
+            id: categoryId
+        },
+        include: {
+            properties: true
+        }
+    });
+
+    if (!category) {
+        throw new GlobalError(
+            httpStatus.NOT_FOUND, "Category not found"
+        );
+    }
+
+    if (category.properties.length > 0) {
+        throw new GlobalError(
+            httpStatus.BAD_REQUEST, "Category cannot be deleted because it is assigned to properties"
+        );
+    }
+
+    await prisma.category.delete({
+        where: {
+            id: categoryId
+        }
+    });
+
+    return null;
+};
+
 
 export const AdminServices = {
     getUsers,
     updateUserStatus,
     getProperties,
     getRentals,
+    createCategory,
+    updateCategory,
+    deleteCategory,
 }
