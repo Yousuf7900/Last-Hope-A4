@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "../../lib/prisma";
 import config from "../../config";
-import type { TLoginUser, TRegisterUser } from "../../types/auth.type";
+import type { TLoginUser, TRegisterUser, TUpdateProfile } from "./auth.interface";
 import { JwtUtils } from "../../utils/jwt";
 import GlobalError from "../../error/globalError";
 import httpStatus from "http-status";
@@ -16,7 +16,7 @@ const registerUser = async (payload: TRegisterUser) => {
             "Admin registration is not allowed"
         );
     }
-    
+
     const isUserExist = await prisma.user.findUnique({
         where: { email }
     });
@@ -103,8 +103,50 @@ const getMe = async (userId: string) => {
     return user;
 }
 
+const updateMe = async (
+    userId: string,
+    payload: TUpdateProfile
+) => {
+
+    const user = await prisma.user.findUnique({
+        where: {
+            id: userId
+        }
+    });
+
+    if (!user) {
+        throw new GlobalError(httpStatus.NOT_FOUND, "User not found");
+    }
+
+    const dataToUpdate: Record<string, unknown> = {};
+
+    if (payload.name) {
+        dataToUpdate.name = payload.name;
+    }
+
+    if (payload.password) {
+        dataToUpdate.password = await bcrypt.hash(
+            payload.password,
+            Number(config.salt_round)
+        );
+    }
+
+    const updatedUser = await prisma.user.update({
+        where: {
+            id: userId
+        },
+        data: dataToUpdate,
+        omit: {
+            password: true
+        }
+    });
+
+    return updatedUser;
+};
+
 export const AuthServices = {
     registerUser,
     loginUser,
-    getMe
+    getMe,
+    updateMe
 }

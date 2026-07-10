@@ -1,4 +1,4 @@
-import type { UserRole } from "../../generated/prisma/enums";
+import type { UserRole } from "../../../generated/prisma/enums";
 
 
 export type TRegisterUser = {
@@ -11,4 +11,9 @@ export type TRegisterUser = {
 export type TLoginUser = {
     email: string;
     password: string;
+}
+
+export type TUpdateProfile = {
+    name?: string;
+    password?: string;
 }
