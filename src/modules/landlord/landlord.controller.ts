@@ -97,10 +97,29 @@ const updateRentalRequest = catchAsync(async (req: Request, res: Response) => {
 
 });
 
+const getTenantHistory = catchAsync(async (req, res) => {
+
+    const landlordId = req.user!.userId;
+
+    const result = await LandlordServices.getTenantHistory(
+        landlordId,
+        req.params.tenantId as string
+    );
+
+    sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "Tenant history retrieved successfully",
+        data: result
+    });
+
+});
+
 export const LandlordControllers = {
     createProperty,
     updateProperty,
     deleteProperty,
     getRentalRequests,
     updateRentalRequest,
+    getTenantHistory
 }

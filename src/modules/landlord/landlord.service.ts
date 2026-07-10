@@ -214,6 +214,57 @@ const updateRentalRequest = async (
     return updatedRental;
 };
 
+const getTenantHistory = async (
+    landlordId: string,
+    tenantId: string
+) => {
+
+    const tenant = await prisma.user.findUnique({
+        where: {
+            id: tenantId
+        },
+        omit: {
+            password: true
+        }
+    });
+
+    if (!tenant) {
+        throw new GlobalError(
+            httpStatus.NOT_FOUND,
+            "Tenant not found"
+        );
+    }
+
+    const rentals = await prisma.rental.findMany({
+        where: {
+            tenantId,
+            property: {
+                landlordId
+            }
+        },
+        include: {
+            property: {
+                include: {
+                    category: true
+                }
+            },
+            payment: true,
+            review: true
+        },
+        orderBy: {
+            createdAt: "desc"
+        }
+    });
+
+    if (rentals.length === 0) {
+        throw new GlobalError(httpStatus.NOT_FOUND, "No rental history found for this tenant")
+    }
+
+    return {
+        tenant,
+        rentals
+    };
+};
 
 
 export const LandlordServices = {
@@ -222,4 +273,5 @@ export const LandlordServices = {
     deleteProperty,
     getRentalRequests,
     updateRentalRequest,
+    getTenantHistory
 }

@@ -19,4 +19,6 @@ router.get("/requests", auth(UserRole.LANDLORD), LandlordControllers.getRentalRe
 
 router.patch("/requests/:id", auth(UserRole.LANDLORD), validateRequest(LandlordValidations.updateRentalStatusValidation), LandlordControllers.updateRentalRequest);
 
+router.get("/tenants/:tenantId/history", auth(UserRole.LANDLORD), LandlordControllers.getTenantHistory)
+
 export const LandlordRoutes = router;
